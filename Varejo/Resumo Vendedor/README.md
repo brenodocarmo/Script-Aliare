@@ -1,0 +1,1 @@
+# Resumo Vendedor Varejo
