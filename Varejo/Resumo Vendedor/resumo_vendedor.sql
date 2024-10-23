@@ -7,7 +7,7 @@ Data: 22/10/2024
 
 */
 
-CREATE OR REPLACE VIEW vw_resumo_vendedor_varejo as
+CREATE OR REPLACE VIEW vw_resumo_vendedor_varejo AS
   
   SELECT
     nota.codi_cic codi_ciclo,

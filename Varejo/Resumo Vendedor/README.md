@@ -1,6 +1,6 @@
 # Resumo Vendedor Varejo
 
-
+Segue alguns pontos foram abordados:
 
 ✅ Código do ciclo;
 
