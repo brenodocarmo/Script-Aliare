@@ -39,7 +39,7 @@ cte_recencia_varejo as (
             WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 16 AND TRUNC(SYSDATE - compra.data_ultima_compra) <= 30 THEN '16-30'
             WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 31 AND TRUNC(SYSDATE - compra.data_ultima_compra) <= 45 THEN '31-45'
             WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 41 AND TRUNC(SYSDATE - compra.data_ultima_compra) <= 60 THEN '41-60'
-  					WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 61 AND TRUNC(SYSDATE - compra.data_ultima_compra) <= 85 THEN '61-85'
+  			WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 61 AND TRUNC(SYSDATE - compra.data_ultima_compra) <= 85 THEN '61-85'
             WHEN TRUNC(SYSDATE - compra.data_ultima_compra) >= 86 THEN '>86'
         END AS segmentacao_recencia,
         
