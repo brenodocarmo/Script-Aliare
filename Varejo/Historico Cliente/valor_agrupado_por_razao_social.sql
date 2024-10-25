@@ -25,3 +25,4 @@ SELECT
     v.*
 FROM cte_valor_agrupado v
 ;
+

@@ -49,3 +49,4 @@ cte_recencia_varejo as (
     )
     
 SELECT * FROM  cte_recencia_varejo;
+
