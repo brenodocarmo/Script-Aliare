@@ -7,7 +7,6 @@ WITH cte_parceiro_varejo AS (
         v.razao_social,
         v.valor_total        
     FROM vw_painel_cliente_varejo v
-    --WHERE v.cnpj_cpf IN ('06268889000179', '06268889000330', '01318353000105', '32627353000374', '32627353000293', '29565704000193', '29565704000274', '07951727000101', '07951727000284')
 ),
 
 cte_valor_agrupado AS (
