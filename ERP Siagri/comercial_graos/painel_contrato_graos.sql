@@ -41,10 +41,10 @@ SELECT
     ctrcompra.qtde_ccp,
     CASE
         WHEN tipoctrc.tipo_tic = 'S'
-            THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999'))) --AS "Qtd. Saída"
+            THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999')))
         ELSE    
             ((select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROE', '01/01/2999'))) +
-            (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRC', '01/01/2999')))) --AS "Entregue",
+            (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRC', '01/01/2999'))))
     END AS "Entregue",
     
     CASE 
