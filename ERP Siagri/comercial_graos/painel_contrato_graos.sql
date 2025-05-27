@@ -45,7 +45,14 @@ SELECT
         ELSE    
             ((select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROE', '01/01/2999'))) +
             (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRC', '01/01/2999')))) --AS "Entregue",
-    END AS "Entregue"
+    END AS "Entregue",
+    
+    CASE 
+        WHEN ctrcompra.codi_tic = 44 
+            THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999'))) + 
+                 (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRD', '01/01/2999')))
+        ELSE 0
+    END AS "Devolvido"
     
     
 
@@ -60,3 +67,5 @@ JOIN tipoctrc ON (ctrcompra.codi_tic = tipoctrc.codi_tic)
 
 WHERE 
     ctrcompra.nume_ccp IN (10790, 12244, 10797, 9363, 10812, 11142, 11493)
+
+order by ctrcompra.codi_tic
