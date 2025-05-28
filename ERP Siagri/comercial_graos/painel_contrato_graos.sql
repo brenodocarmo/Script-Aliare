@@ -76,7 +76,18 @@ SELECT
             THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999'))) + 
                  (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRD', '01/01/2999')))
         ELSE 0
-    END AS qtde_devolvido
+    END AS qtde_devolvido,
+    
+    ctrcompra.dven_ccp, -- Vem como null (olhar outra coluna)
+    COALESCE(ctrcompra.vlor_ccp, 0) vlor_ccp,
+    COALESCE(ctrcompra.tota_ccp, 0) tota_ccp,
+    COALESCE(ctrcompra.vbim_ccp, 0) vbim_ccp,
+    COALESCE(ctrcompra.vliq_ccp, 0) vliq_ccp,
+    COALESCE(ctrcompra.vlip_ccp, 0) vlip_ccp,
+    COALESCE(ctrcompra.vftn_ccp, 0) vftn_ccp
+    
+    
+    
     
 FROM ctrcompra
 
@@ -88,9 +99,9 @@ LEFT JOIN paramgerarmz ON (ctrcompra.codi_emp = paramgerarmz.codi_emp)
 
 
 WHERE 
-    ctrcompra.nume_ccp = 12244
+    --ctrcompra.nume_ccp = 12244
     --ctrcompra.nume_ccp = 10812
-    --ctrcompra.nume_ccp IN (10790, 12244, 10797, 9363, 10812, 11142, 11493)
+    ctrcompra.nume_ccp IN (10790, 12244, 10797, 9363, 10812, 11142, 11493, 11363)
 
 order by ctrcompra.codi_tic
 
@@ -144,7 +155,15 @@ SELECT
                 ELSE
                     ((tb_painel.qtde_ccp - (tb_painel.qtde_ros + tb_painel.qtde_trd - tb_painel.qtde_roe)) - tb_painel.qtde_bco + tb_painel.qtde_nfd)
             END                 
-    END AS saldo
+    END AS saldo,
+    tb_painel.dven_ccp,
+    tb_painel.vlor_ccp,
+    tb_painel.tota_ccp,
+    tb_painel.vbim_ccp,
+    tb_painel.vliq_ccp,
+    tb_painel.vlip_ccp,
+    tb_painel.vftn_ccp
             
     
 FROM tb_painel
+
