@@ -1,4 +1,4 @@
-
+WITH tb_painel AS (
 SELECT 
      ctrcompra.codi_emp,
      ctrcompra.codi_cic,
@@ -10,11 +10,15 @@ SELECT
         WHEN ctrcompra.situ_ccp = 6 THEN 'Liberado Parcialmente'
         WHEN ctrcompra.situ_ccp = 9 THEN 'Cancelado'
     END AS status_contrato,
+    
+    tipoctrc.tipo_tic,
+    tipoctrc.moda_tic,
+    
     CASE
         WHEN tipoctrc.moda_tic = 2 THEN 'Valor Fixo'
         WHEN tipoctrc.moda_tic = 3 THEN 'Deposito'
         WHEN tipoctrc.moda_tic = 7 THEN 'Compra Direta'
-    END AS "Modalidade",
+    END AS modalidade,
     CASE
         WHEN tipoctrc.tipo_tic = 'E' THEN 'Entrada'
         ELSE 'Saida'
@@ -25,7 +29,7 @@ SELECT
     ctrcompra.codi_tra,
     transac.raza_tra,
     COALESCE(ctrcompra.prop_pro, 0) prop_pro,
-    COALESCE(propried.desc_pro, 'ñ possui') desc_pro,
+    COALESCE(propried.desc_pro, 'Ñ POSSUI') desc_pro,
     ctrcompra.codi_psv,
     prodserv.desc_psv,
     ctrcompra.data_ccp,
@@ -38,34 +42,109 @@ SELECT
         WHEN ctrcompra.fret_ccp = 4 THEN 'Proprio por conta do destinatario'
         WHEN ctrcompra.fret_ccp = 9 THEN 'Sem cobranca'
     END as frete,
+    
+    
+    CASE
+        WHEN ((tipoctrc.moda_tic IN ('3', '7', '8', '10')) OR (tipoctrc.moda_tic = '1' and ognf_tic = 'C') OR (tipoctrc.tipo_tic = 'S'))
+            OR (COALESCE(paramgerarmz.ecmo_pam, 'N') = 'T') OR (COALESCE(paramgerarmz.ecmo_pam, 'N') = 'A') OR (COALESCE(paramgerarmz.ecmo_pam, 'N') = 'A')
+            OR ((COALESCE(paramgerarmz.ecmo_pam, 'N') = 'E') AND (tipoctrc.tipo_tic = 'E')) THEN 'R'
+        ELSE
+            'F'
+    END AS tipo_baixa,
+    
     ctrcompra.qtde_ccp,
+    
+    
     CASE
         WHEN tipoctrc.tipo_tic = 'S'
             THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999')))
         ELSE    
             ((select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROE', '01/01/2999'))) +
             (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRC', '01/01/2999'))))
-    END AS "Entregue",
+    END AS entregue,
+
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROE', '01/01/2999'))) AS qtde_roe,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999'))) AS qtde_ros,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRD', '01/01/2999'))) AS qtde_trd,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRC', '01/01/2999'))) as qtde_trc,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'NFD', '01/01/2999'))) as qtde_nfd,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'FIX', '01/01/2999'))) as qtde_fixada,
+    (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'BCO', '01/01/2999'))) as qtde_bco,
     
     CASE 
         WHEN ctrcompra.codi_tic = 44 
             THEN (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'ROS', '01/01/2999'))) + 
                  (select SALDO from table(QTDE_MOVIMENTADA(ctrcompra.nume_ccp, 0, 0, 'TRD', '01/01/2999')))
         ELSE 0
-    END AS "Devolvido"
+    END AS qtde_devolvido
     
-    
-
-
 FROM ctrcompra
 
 JOIN transac ON (ctrcompra.codi_tra = transac.codi_tra)
 LEFT JOIN propried ON (ctrcompra.prop_pro = propried.prop_pro)
 JOIN prodserv ON (ctrcompra.codi_psv = prodserv.codi_psv)
 JOIN tipoctrc ON (ctrcompra.codi_tic = tipoctrc.codi_tic)
+LEFT JOIN paramgerarmz ON (ctrcompra.codi_emp = paramgerarmz.codi_emp)
 
 
 WHERE 
-    ctrcompra.nume_ccp IN (10790, 12244, 10797, 9363, 10812, 11142, 11493)
+    ctrcompra.nume_ccp = 12244
+    --ctrcompra.nume_ccp = 10812
+    --ctrcompra.nume_ccp IN (10790, 12244, 10797, 9363, 10812, 11142, 11493)
 
 order by ctrcompra.codi_tic
+
+)
+
+SELECT 
+    tb_painel.codi_emp,
+    tb_painel.codi_cic,
+    tb_painel.nume_ccp,
+    tb_painel.status_contrato,
+    tb_painel.moda_tic,
+    tb_painel.modalidade,
+    tb_painel.operacao,
+    tb_painel.codi_tic,
+    tb_painel.desc_tic,
+    tb_painel.ccp_original,
+    tb_painel.codi_tra,
+    tb_painel.raza_tra,
+    tb_painel.prop_pro,
+    tb_painel.desc_pro,
+    tb_painel.codi_psv,
+    tb_painel.desc_psv,
+    tb_painel.data_ccp,
+    tb_painel.fret_ccp,
+    tb_painel.frete,
+    tb_painel.tipo_baixa,
+    tb_painel.qtde_ccp,
+    tb_painel.entregue,
+    tb_painel.qtde_devolvido,
+    tb_painel.qtde_bco,
+ 
+    CASE
+        WHEN tb_painel.tipo_tic = 'E'
+            THEN ((tb_painel.qtde_roe + tb_painel.qtde_trc) - (tb_painel.qtde_ros + tb_painel.qtde_trd + tb_painel.qtde_nfd))
+        ELSE
+            ((tb_painel.qtde_ros + tb_painel.qtde_trd) - (tb_painel.qtde_roe + tb_painel.qtde_trc + tb_painel.qtde_nfd))
+    END AS qdte_deposito,
+    
+    CASE
+        WHEN tb_painel.moda_tic = '3' THEN
+            CASE
+                WHEN tb_painel.tipo_tic = 'E' 
+                    THEN ((tb_painel.qtde_ccp - (tb_painel.qtde_roe + tb_painel.qtde_trc)) - tb_painel.qtde_bco + tb_painel.qtde_nfd)
+                ELSE
+                    ((tb_painel.qtde_ccp - (tb_painel.qtde_roe + tb_painel.qtde_trd)) - tb_painel.qtde_bco + tb_painel.qtde_nfd)
+            END
+        ELSE
+            CASE 
+                WHEN tb_painel.tipo_tic = 'E'
+                    THEN ((tb_painel.qtde_ccp - (tb_painel.qtde_roe + tb_painel.qtde_trc - tb_painel.qtde_ros)) - tb_painel.qtde_bco + tb_painel.qtde_nfd)
+                ELSE
+                    ((tb_painel.qtde_ccp - (tb_painel.qtde_ros + tb_painel.qtde_trd - tb_painel.qtde_roe)) - tb_painel.qtde_bco + tb_painel.qtde_nfd)
+            END                 
+    END AS saldo
+            
+    
+FROM tb_painel
